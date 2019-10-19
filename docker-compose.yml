@@ -1,0 +1,33 @@
+version: '2'
+
+services:
+  mongodb:
+    image: mongo:latest
+    restart: always
+    volumes:
+      - ${HOME}/.mongodb:/data/db
+    networks:
+      app_net:
+        ipv4_address: ${MONGODB_ADDR}
+
+  ssshare:
+    build: .
+    restart: always
+    volumes:
+      - ./ssshare:/usr/src/app/ssshare
+    depends_on:
+      - mongodb
+    environment:
+      - MONGODB_ADDR=${MONGODB_ADDR}
+    networks:
+      app_net:
+        ipv4_address: ${SSSHARE_ADDR}
+
+networks:
+  app_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: ${SUBNET}
+        gateway: ${GATEWAY}
