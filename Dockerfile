@@ -1,4 +1,4 @@
-FROM python:2
+FROM python:3
 
 LABEL maintainer="Graz<hcjonline@gmail.com>"
 

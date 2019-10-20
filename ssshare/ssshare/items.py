@@ -7,6 +7,6 @@
 
 from scrapy import Item, Field
 
+
 class SsshareItem(Item):
-    title = Field()
     listss = Field()

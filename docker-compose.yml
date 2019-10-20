@@ -1,14 +1,16 @@
-version: '2'
+version: '3'
 
 services:
+
   mongodb:
     image: mongo:latest
     restart: always
     volumes:
       - ${HOME}/.mongodb:/data/db
     networks:
-      app_net:
-        ipv4_address: ${MONGODB_ADDR}
+      default:
+        aliases:
+          - mongodb.host
 
   ssshare:
     build: .
@@ -17,17 +19,6 @@ services:
       - ./ssshare:/usr/src/app/ssshare
     depends_on:
       - mongodb
-    environment:
-      - MONGODB_ADDR=${MONGODB_ADDR}
-    networks:
-      app_net:
-        ipv4_address: ${SSSHARE_ADDR}
-
-networks:
-  app_net:
-    driver: bridge
-    ipam:
-      driver: default
-      config:
-      - subnet: ${SUBNET}
-        gateway: ${GATEWAY}
+    extra_hosts:
+      - "youneed.win:104.31.74.55"
+      - "www.youneed.win:104.31.74.55"
