@@ -3,7 +3,7 @@ import scrapy
 import re
 from scrapy.selector import Selector
 from ssshare.items import SsshareItem
-from ssshare.url_config import URLS, SUBSCRIPTIONS, CUSTOMURLS
+from ssshare.url_config import URLS, SUBSCRIPTIONS
 from ssshare.util import Util
 
 
@@ -13,15 +13,14 @@ class YouneedSpider(scrapy.Spider):
     allowed_domains = ['youneed.win']
     urls = list(set(URLS))
     subscriptions = list(set(SUBSCRIPTIONS))
-    customurls = list(set(CUSTOMURLS))
 
     def start_requests(self):
-        for curl in self.customurls:
-            self.logger.info('Start request from custom url: %s', curl)
-            yield scrapy.Request(url=curl, callback=self.parse_url)
         for url in self.urls:
             self.logger.info('Start request from url: %s', url)
-            yield scrapy.Request(url=url, callback=self.parse_ss)
+            callbackfun = self.parse_ss
+            if url == 'https://www.youneed.win/free-ss':
+                callbackfun = self.parse_free_ss
+            yield scrapy.Request(url=url, callback=callbackfun)
         for sub in self.subscriptions:
             self.logger.info('Start request from subscriptions: %s', sub)
             yield scrapy.Request(url=sub, callback=self.parse_subscr)
@@ -42,37 +41,43 @@ class YouneedSpider(scrapy.Spider):
             """
             listss.update(map(lambda x: re.sub('\\s', '', x),
                               re.findall('ssr?://[a-zA-Z0-9_]+=*', str(text))))
-            return self.parse_item(selector, listss)
+            title = selector.xpath("//title/text()").get(default=self.name)
+            return self.parse_items(listss, response.url, title)
 
-    def parse_url(self, response):
+    def parse_subscr(self, response):
+        items = Util.decode(response.text).split('\n')
+        return self.parse_items(items, response.url)
+
+    # only support youneed.win/free-ss site
+    def parse_free_ss(self, response):
         selector = Selector(response)
-        listtr = selector.xpath("//article[@id='post-box']//tbody/tr")
-        return self.parse_item(selector, listtr)
-
-    def parse_item(self, selector, items):
         title = selector.xpath("//title/text()").get(default=self.name)
-        ssitem = SsshareItem()
+        listtr = selector.xpath("//article[@id='post-box']//tbody/tr")
+        return self.parse_items(listtr, response.url, title)
+
+    def parse_items(self, items, url, title="SS or SSR 订阅源"):
+        sssitem = SsshareItem()
         listss = list()
-        if type(items) is set:
-            for i, ss in enumerate(items):
-                listss.append({
-                    "title": ' '.join([title, str(i)]),
-                    "hashcode": Util.hashmd5(ss),
-                    "ssurl": ss
-                })
-        else:
-            k = 0
-            for ss in items:
-                td = ss.xpath(".//td/text()").getall()
-                self.logger.debug('List ss: %s', str(td))
-                ssurl = 'ss://%s' % Util.encode('%s:%s@%s:%s' %
-                                                (td[0], td[1], td[2], td[3]))
-                self.logger.debug('List ssurl: %s', ssurl)
-                listss.append({
-                    "title": ' '.join([title, str(k)]),
-                    "hashcode": Util.hashmd5(ssurl),
-                    "ssurl": ssurl
-                })
-                k = k + 1
-        ssitem["listss"] = listss
-        return ssitem
+        for k, item in enumerate(set(items)):
+            if isinstance(item, Selector):
+                td = item.xpath(".//td/text()").getall()
+                if len(td) > 3:
+                    self.logger.debug('List ss: %s', str(td))
+                    ssurl = 'ss://%s' % Util.encode(
+                        '%s:%s@%s:%s' % (td[0], td[1], td[2], td[3]))
+                    self.logger.debug('List ssurl: %s', ssurl)
+                    listss.append(self.get_item(ssurl, url, title, k))
+            else:
+                if len(item) > 5:
+                    self.logger.debug('List ssurl: %s', str(item))
+                    listss.append(self.get_item(item, url, title, k))
+        sssitem["listss"] = listss
+        return sssitem
+
+    def get_item(self, item, url, title, k):
+        return {
+            "title": " ".join([title, str(k)]),
+            "url": url,
+            "hashcode": Util.hashmd5(item),
+            "ssurl": item
+        }

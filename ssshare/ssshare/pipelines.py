@@ -42,7 +42,6 @@ class SssharePipeline(object):
 
     def process_item(self, item, spider):
         if isinstance(item, SsshareItem):
-            self.logger.debug('Show spider item: [%s]', str(item))
             try:
                 savess = list()
                 listss = item['listss']
@@ -51,12 +50,12 @@ class SssharePipeline(object):
                     if res is None:
                         savess.append(ss)
                 # Only insert not in collection
-                if len(savess) > 0:
-                    self.logger.info(
-                        'Save new list ss to mongodb has [%d] count',
-                        len(savess))
+                count = len(savess)
+                if count > 0:
                     self.logger.debug('Save to mongodb: [%s]', str(savess))
                     self.col.insert_many(savess)
+                self.logger.info('Save new list ss to mongodb has [%d] count',
+                                 count)
             except Exception as e:
                 self.logger.error('Save to mongodb error:%s', str(e))
         return item

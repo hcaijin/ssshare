@@ -27,8 +27,6 @@ ROBOTSTXT_OBEY = True
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
 
-# See https://docs.scrapy.org/en/latest/topics/settings.html#scheduler-debug
-SCHEDULER_DEBUG = False
 LOG_LEVEL = 'INFO'  # 日志级别
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay

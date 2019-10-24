@@ -13,3 +13,14 @@ class Util(object):
     def encode(string):
         return base64.urlsafe_b64encode(
             bytes(str(string), 'utf-8')).decode('utf-8').replace('=', '')
+
+    def decode(string):
+        try:
+            return str(
+                base64.urlsafe_b64decode(
+                    bytes(
+                        string.strip('/') +
+                        (4 - len(string.strip('/')) % 4) * '=' + '====',
+                        'utf-8')), 'utf-8')
+        except Exception as e:
+            raise Exception(e, string)
