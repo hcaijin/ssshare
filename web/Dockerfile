@@ -12,8 +12,11 @@ RUN set -ex \
       && apk update \
       && apk add --no-cache --virtual .build-deps \
                       git \
+                      tzdata \
       && apk add --no-cache \
-                      libsodium
+                      libsodium \
+      && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+      && echo "Asia/Shanghai" > /etc/timezone \
 
 WORKDIR $WORK
 

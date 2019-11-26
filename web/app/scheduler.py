@@ -4,10 +4,10 @@
 import re
 import logging
 import json
-import random
 import urllib
 from app.speedtest import test_speed
 from app.util import Util
+from app.collections.sscol import SsCollection
 from app.collections.newsscol import NewSsCollection
 
 logger = logging.getLogger(__name__)
@@ -107,6 +107,10 @@ def _getItems(listss):
         server['status'], server['content'] = test_speed(cjson)
         ssobj = dict2obj(server)
         if isinstance(ssobj, NewSsCollection):
+            try:
+                SsCollection.objects(hashcode=ssobj.hashcode).update_one(status=ssobj.status)
+            except Exception as es:
+                logger.error("Update ss collection status error:%s", str(es))
             try:
                 oness = NewSsCollection.objects(hashcode=ss.hashcode).first()
             except Exception as e:

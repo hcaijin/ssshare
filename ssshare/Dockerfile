@@ -2,6 +2,10 @@ FROM python:3
 
 LABEL maintainer="Graz<hcjonline@gmail.com>"
 
+RUN set -ex \
+      && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+      && echo "Asia/Shanghai" > /etc/timezone \
+
 WORKDIR /usr/src/app
 
 COPY requirements.txt .

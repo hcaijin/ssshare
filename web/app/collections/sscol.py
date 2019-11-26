@@ -10,6 +10,7 @@ class SsCollection(db.Document):
     url = db.StringField(max_length=100)
     hashcode = db.StringField(required=True, unique=True, default="")
     ssurl = db.StringField(required=True, default="")
+    status = db.IntField(default=0)
     uptime = db.DateTimeField(default=datetime.now())
 
     meta = {

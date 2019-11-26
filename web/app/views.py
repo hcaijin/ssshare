@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import time
 import logging
 import threading
 import math
@@ -35,8 +34,8 @@ def startBackground():
 def allsslist():
     try:
         page = request.args.get('page', 1)
-        count = model.getSScount()
-        sslist = model.getSSpage(page=page, per=20)
+        count = model.getAllcount()
+        sslist = model.getAllpage(page=page, per=20)
         return render_template(
             'all.html',
             sslist=sslist,

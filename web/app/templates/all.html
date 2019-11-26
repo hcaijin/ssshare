@@ -13,6 +13,7 @@
         <thead>
           <tr>
             <td>title</td>
+            <td>status</td>
             <td>url</td>
             <td>ssurl</td>
           </tr>
@@ -21,6 +22,7 @@
           {% for ss in sslist.items %}
           <tr>
             <td>{{ ss.title }}</td>
+            <td>{{ ss.status }}</td>
             <td>{{ ss.uptime }}</td>
             <td><textarea name="ssurl" id="ssurl" rows="8" cols="40">{{ ss.ssurl }}</textarea></td>
           </tr>
