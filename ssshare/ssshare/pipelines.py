@@ -6,13 +6,12 @@
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
 import logging
-from pymongo import MongoClient
 from ssshare.items import SsshareItem
-from pymongo.errors import ConnectionFailure
+from mongoengine import connect, disconnect
+from ssshare.ssitem import SsItem
 
 
 class SssharePipeline(object):
-    collection_name = 'ss_items'
     logger = logging.getLogger(__name__)
 
     def __init__(self, mongo_uri, mongo_db):
@@ -28,34 +27,36 @@ class SssharePipeline(object):
 
     def open_spider(self, spider):
         try:
-            self.client = MongoClient(self.mongo_uri)
-            db = self.client[self.mongo_db]
-            self.col = db[self.collection_name]
-            self.col.create_index([("hashcode")], unique=True)
-        except ConnectionFailure:
-            self.logger.error("Mongodb connect fail")
+            connect(self.mongo_db, host=self.mongo_uri)
         except Exception as e:
             self.logger.error('Open mongodb error:%s', str(e))
 
     def close_spider(self, spider):
-        self.client.close()
+        disconnect(self.mongo_db)
 
     def process_item(self, item, spider):
         if isinstance(item, SsshareItem):
             try:
                 savess = list()
-                listss = item['listss']
-                for ss in listss:
-                    res = self.col.find_one({"hashcode": ss['hashcode']})
+                for ss in item['listss']:
+                    res = SsItem.objects(hashcode=ss['hashcode']).first()
                     if res is None:
-                        savess.append(ss)
-                # Only insert not in collection
+                        # Only insert not in collection
+                        savess.append(self.dict2obj(ss))
                 count = len(savess)
                 if count > 0:
-                    self.logger.debug('Save to mongodb: [%s]', str(savess))
-                    self.col.insert_many(savess)
+                    SsItem.objects.insert(savess)
                 self.logger.info('Save new list ss to mongodb has [%d] count',
                                  count)
             except Exception as e:
                 self.logger.error('Save to mongodb error:%s', str(e))
-        return item
+
+    def dict2obj(self, d):
+        try:
+            d = dict(d)
+        except (TypeError, ValueError):
+            return d
+        obj = SsItem()
+        for k, v in d.items():
+            obj[k] = v
+        return obj
