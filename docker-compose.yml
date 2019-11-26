@@ -7,18 +7,30 @@ services:
     restart: always
     volumes:
       - ${HOME}/.mongodb:/data/db
+    ports:
+      - "127.0.0.1:27017:27017"
     networks:
       default:
         aliases:
           - mongodb.host
 
   ssshare:
-    build: .
+    build: ./ssshare
     restart: always
     volumes:
-      - ./ssshare:/usr/src/app/ssshare
+      - ./ssshare:/usr/src/app
     depends_on:
       - mongodb
     extra_hosts:
       - "youneed.win:104.31.74.55"
       - "www.youneed.win:104.31.74.55"
+
+  web:
+    build: ./web
+    restart: always
+    volumes:
+      - ./web:/usr/src/web
+    depends_on:
+      - mongodb
+    ports:
+      - "127.0.0.1:5000:5000"

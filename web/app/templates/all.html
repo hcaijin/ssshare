@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>SS share all</title>
+  </head>
+  <body>
+    <section class="content">
+      <p>ss or ssr all list</p>
+      <p>{{ count }}</p>
+      <table border="1">
+        <thead>
+          <tr>
+            <td>title</td>
+            <td>url</td>
+            <td>ssurl</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ss in sslist.items %}
+          <tr>
+            <td>{{ ss.title }}</td>
+            <td>{{ ss.uptime }}</td>
+            <td><textarea name="ssurl" id="ssurl" rows="8" cols="40">{{ ss.ssurl }}</textarea></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% macro render_pagination(pagination, endpoint) %}
+      <div class=pagination>
+      {%- for page in pagination.iter_pages() %}
+        {% if page %}
+          {% if page != pagination.page %}
+            <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
+          {% else %}
+            <strong>{{ page }}</strong>
+          {% endif %}
+        {% else %}
+          <span class=ellipsis>…</span>
+        {% endif %}
+      {%- endfor %}
+      </div>
+    {% endmacro %}
+
+    {{ render_pagination(sslist, 'allsslist') }}
+    </section>
+  </body>
+</html>

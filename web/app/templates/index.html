@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>SS share</title>
+  </head>
+  <body>
+    <section class="content">
+      <p>ss or ssr list</p>
+      <table border="1">
+        <thead>
+          <tr>
+            <td>title</td>
+            <td>ssurl</td>
+            <td>status</td>
+            <td>config</td>
+            <td>content</td>
+            <td>ssurl</td>
+            <td>hashcode</td>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ss in sslist.items %}
+          <tr>
+            <td>{{ ss.title }}</td>
+            <td>{{ ss.server }}</td>
+            <td>{{ ss.status }}</td>
+            <td><textarea name="ssjson" id="ssjson" rows="8" cols="40">{{ ss.config_json }}</textarea></td>
+            <td><textarea name="sscontent" id="sscontent" rows="8" cols="40">{{ ss.content }}</textarea></td>
+            <td><textarea name="ssurl" class="qrcode" rows="8" cols="40">{{ ss.ssurl }}</textarea></td>
+            <td>{{ ss.hashcode }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+    {% macro render_pagination(pagination, endpoint) %}
+      <div class=pagination>
+      {%- for page in pagination.iter_pages() %}
+        {% if page %}
+          {% if page != pagination.page %}
+            <a href="{{ url_for(endpoint, page=page) }}">{{ page }}</a>
+          {% else %}
+            <strong>{{ page }}</strong>
+          {% endif %}
+        {% else %}
+          <span class=ellipsis>…</span>
+        {% endif %}
+      {%- endfor %}
+      </div>
+    {% endmacro %}
+
+    {{ render_pagination(sslist, 'index') }}
+  </body>
+<!-- qrcode -->
+<div id="qrcode" style="display: none"></div>
+<script src="http://cdn.bootcss.com/jquery/1.12.3/jquery.min.js"></script>
+<script src="static/js/layer/layer.js"></script>
+<script type=" text/javascript" src="static/js/jquery.qrcode.js"></script>
+<script type="text/javascript" src="static/js/qrcode.js"></script>
+<script>
+$(document).ready(function(){
+  $(".qrcode").on('click', function(){
+    const that = this
+    const qrcode = $('#qrcode')
+    qrcode.children('canvas').remove()
+    qrcode.qrcode({background:'#FFFFFF', ecLevel:'M', text:that.innerHTML})
+    layer.open({
+      type: 1,
+      title: false,
+      clossBtn: 0,
+      shade: 0.1,
+      area: '300px',
+      shadeClose: true,
+      content: qrcode,
+    })
+  })
+})
+</script>
+</html>
