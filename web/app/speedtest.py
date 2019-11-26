@@ -23,14 +23,12 @@ def test_connection(
         start = time.time()
         respond = requests.get(url, headers=headers, proxies=proxies,
                                timeout=timeout)
-        respond_gg = requests.get(url='http://google.com', headers=headers,
-                                  proxies=proxies, timeout=timeout)
-        if respond_gg.ok:
+        if respond.ok:
             ok = (time.time() - start) * 1000
             content = respond.text
         else:
-            ok = respond_gg.ok
-            content = respond_gg.text
+            ok = respond.ok
+            content = respond.text
     except Exception as e:
         print(e)
         content = repr(e)

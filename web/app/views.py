@@ -80,9 +80,9 @@ def setting():
         topss = model.getTopSS()
         #  print("=" * 20 + ">", "setting show message:%s" % type(topss))
         if topss:
-            with open('/etc/shadowsocks/config.json', 'w') as f:
-                f.write(topss.config_json)
-            return {'status': 0, 'info': 'sucess'}
+            #  with open('/etc/shadowsocks/config.json', 'w') as f:
+                #  f.write(topss.config_json)
+            return {'status': 0, 'info': 'sucess', 'data': topss.config_json}
         return {'status': 404, 'info': 'fails'}
     except Exception as e:
         logging.exception("setting error:%s", str(e))

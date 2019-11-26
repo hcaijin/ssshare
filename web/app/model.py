@@ -30,4 +30,5 @@ class SsshareModel(object):
             print(">" * 20, str(e))
 
     def getTopSS(self):
-        return NewSsCollection.objects(status__gt=0).first_or_404()
+        return NewSsCollection.objects(content__not__contains='电信/联通/移动',
+                                       status__gt=0).first_or_404()
