@@ -52,7 +52,7 @@ class YouneedSpider(scrapy.Spider):
         listtr = selector.xpath("//article[@id='post-box']//tbody/tr")
         yield self.parse_items(listtr, response.url, title)
 
-    def parse_items(self, items, url, title="SS SSR 订阅源"):
+    def parse_items(self, items, url, title="订阅源 -"):
         sssitem = SsshareItem()
         listss = list()
         for k, item in enumerate(set(items)):

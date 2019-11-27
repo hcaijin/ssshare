@@ -99,12 +99,15 @@ def _getItems(listss):
         cjson = _formatJson(server)
         if cjson is None:
             continue
-        server['title'] = ss.title
         server['url'] = ss.url
         server['hashcode'] = ss.hashcode
         server['ssurl'] = ss.ssurl
         server['config_json'] = cjson
         server['status'], server['content'] = test_speed(cjson)
+        if server['status'] > 0:
+            server['title'] = ss.title + '-' + server['content'].split('来自于')[1].split(' ')[1] 
+        else:
+            server['title'] = ss.title
         ssobj = dict2obj(server)
         if isinstance(ssobj, NewSsCollection):
             try:
