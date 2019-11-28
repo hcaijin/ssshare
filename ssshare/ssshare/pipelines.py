@@ -36,20 +36,32 @@ class SssharePipeline(object):
 
     def process_item(self, item, spider):
         if isinstance(item, SsshareItem):
-            try:
-                savess = list()
-                for ss in item['listss']:
+            update_count = 0
+            savess = list()
+            for ss in item['listss']:
+                try:
                     res = SsItem.objects(hashcode=ss['hashcode']).first()
-                    if res is None:
-                        # Only insert not in collection
-                        savess.append(self.dict2obj(ss))
-                count = len(savess)
-                if count > 0:
+                except Exception as e:
+                    self.logger.error("Find hashcode(%s) error:%s", ss['hashcode'], str(e))
+                    continue
+                if res is None:
+                    # Only insert not in collection
+                    savess.append(self.dict2obj(ss))
+                else:
+                    try:
+                        SsItem.objects(hashcode=res.hashcode, status__lt=0).update_one(status=0)
+                        update_count += 1
+                    except Exception as e:
+                        self.logger.error("Update hashcode(%s) error:%s", res.hashcode, str(e))
+                        continue
+            self.logger.info('Update ss to mongodb has [%d] count', update_count)
+            count = len(savess)
+            if count > 0:
+                try:
                     SsItem.objects.insert(savess)
-                self.logger.info('Save new list ss to mongodb has [%d] count',
-                                 count)
-            except Exception as e:
-                self.logger.error('Save to mongodb error:%s', str(e))
+                except Exception as e:
+                    self.logger.error('Save to mongodb error:%s', str(e))
+            self.logger.info('Save new ss to mongodb has [%d] count', count)
 
     def dict2obj(self, d):
         try:
